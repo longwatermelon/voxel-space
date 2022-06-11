@@ -65,8 +65,8 @@ void prog_mainloop(struct Prog *p)
 
         if (keys[SDL_SCANCODE_LEFT]) p->cam->angle -= .03f;
         if (keys[SDL_SCANCODE_RIGHT]) p->cam->angle += .03f;
-        if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 1.f;
-        if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 1.f;
+        if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 5.f;
+        if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 5.f;
 
         if (keys[SDL_SCANCODE_W])
         {
@@ -75,6 +75,12 @@ void prog_mainloop(struct Prog *p)
         }
 
         prog_reset_heightbuf(p);
+
+        SDL_Point coords = prog_image_coords(p, p->height, p->cam->pos.x, p->cam->pos.y);
+        float height = (255.f - image_at(p->height, coords.x, coords.y).r);
+
+        if (-p->cam->height > height - 10)
+            p->cam->height = -(height - 10);
 
         SDL_RenderClear(p->rend);
 
