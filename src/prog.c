@@ -80,19 +80,19 @@ void prog_render_terrain(struct Prog *p)
     }
 #endif
 
-    for (int y = 0; y < 800; ++y)
-    {
-        for (int x = 0; x < 800; ++x)
-        {
-            SDL_Color col = image_at(p->color, (float)x / 800 * p->color->w, (float)y / 800 * p->color->h);
-            SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
-            SDL_RenderDrawPoint(p->rend, x, y);
-        }
-    }
+    /* for (int y = 0; y < 800; ++y) */
+    /* { */
+    /*     for (int x = 0; x < 800; ++x) */
+    /*     { */
+    /*         SDL_Color col = image_at(p->color, (float)x / 800 * p->color->w, (float)y / 800 * p->color->h); */
+    /*         SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255); */
+    /*         SDL_RenderDrawPoint(p->rend, x, y); */
+    /*     } */
+    /* } */
 
-    SDL_Rect cam = { p->cam->pos.x - 5, p->cam->pos.y - 5, 10, 10 };
-    SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
-    SDL_RenderFillRect(p->rend, &cam);
+    /* SDL_Rect cam = { p->cam->pos.x - 5, p->cam->pos.y - 5, 10, 10 }; */
+    /* SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255); */
+    /* SDL_RenderFillRect(p->rend, &cam); */
 
     float left = -M_PI / 4.f;
     float right = M_PI / 4.f;
@@ -114,40 +114,26 @@ void prog_render_terrain(struct Prog *p)
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
 
-    for (float z = 200.f; z > 1.f; z -= 5)
+    for (float z = 300.f; z > 1.f; z -= 1)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
 
-        SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
-        SDL_RenderDrawPoint(p->rend, lp.x, lp.y);
-        SDL_RenderDrawPoint(p->rend, rp.x, rp.y);
+        float dx = (rp.x - lp.x) / 800.f;
+        float dy = (rp.y - lp.y) / 800.f;
 
-        float slope = (rp.y - lp.y) / (rp.x - lp.x);
-
-        if (fabsf(slope) > 1.f) // iterate with y
+        for (int i = 0; i < 800; ++i)
         {
-            Vec2f min = lp.y < rp.y ? lp : rp;
-            Vec2f max = lp.y < rp.y ? rp : lp;
-            float x = min.x;
+            float height = image_at(p->height, lp.x / 800.f * p->height->w, lp.y / 800.f * p->height->h).r;
+            height /= z;
+            height = 0 + (height + .5f) * 800.f;
 
-            for (int y = min.y; y < max.y; ++y)
-            {
-                SDL_RenderDrawPoint(p->rend, x, y);
-                x += 1.f / slope;
-            }
-        }
-        else // iterate with x
-        {
-            Vec2f min = lp.x < rp.x ? lp : rp;
-            Vec2f max = lp.x < rp.x ? rp : lp;
-            float y = min.y;
+            SDL_Color col = image_at(p->color, lp.x / 800.f * p->color->w, lp.y / 800.f * p->color->h);
+            SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
+            SDL_RenderDrawLine(p->rend, i, height, i, 800);
 
-            for (int x = min.x; x < max.x; ++x)
-            {
-                SDL_RenderDrawPoint(p->rend, x, y);
-                y += slope;
-            }
+            lp.x += dx;
+            lp.y += dy;
         }
     }
 }
