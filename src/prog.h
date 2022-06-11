@@ -17,7 +17,7 @@ struct Prog
 
     struct Camera *cam;
 
-    int heightbuf[800];
+    int ybuf[800];
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
@@ -32,7 +32,7 @@ void prog_switch_map(struct Prog *p, const char *color, const char *height);
 
 Vec2f prog_matmul(float mat[2][2], Vec2f p);
 
-void prog_reset_heightbuf(struct Prog *p);
+void prog_reset_ybuf(struct Prog *p);
 
 #endif
 

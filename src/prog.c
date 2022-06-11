@@ -16,6 +16,8 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
 
     p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f, 0.f);
 
+    prog_reset_ybuf(p);
+
     return p;
 }
 
@@ -77,7 +79,7 @@ void prog_mainloop(struct Prog *p)
             p->cam->pos.y += 5.f * sinf(p->cam->angle);
         }
 
-        prog_reset_heightbuf(p);
+        prog_reset_ybuf(p);
 
         SDL_Point coords = prog_image_coords(p, p->height, p->cam->pos.x, p->cam->pos.y);
         float height = (255.f - image_at(p->height, coords.x, coords.y).r);
@@ -119,7 +121,7 @@ void prog_render_terrain(struct Prog *p)
     float dist = 600.f / cosf(p->cam->pitch);
     float dz = dist / 600.f;
 
-    for (float z = dist; z > 1.f; z -= dz)
+    for (float z = 1.f; z < dist; z += dz)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -137,16 +139,17 @@ void prog_render_terrain(struct Prog *p)
 
             int bottom = 800;
 
-            if (height < p->heightbuf[i])
+            if (height < p->ybuf[i])
             {
-                bottom = p->heightbuf[i];
-                p->heightbuf[i] = height;
+                bottom = p->ybuf[i];
+                p->ybuf[i] = height;
+
+                coords = prog_image_coords(p, p->color, lp.x, lp.y);
+                SDL_Color col = image_at(p->color, coords.x, coords.y);
+                SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
+                SDL_RenderDrawLine(p->rend, i, height, i, bottom);
             }
 
-            coords = prog_image_coords(p, p->color, lp.x, lp.y);
-            SDL_Color col = image_at(p->color, coords.x, coords.y);
-            SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
-            SDL_RenderDrawLine(p->rend, i, height, i, bottom);
 
             lp.x += dx;
             lp.y += dy;
@@ -190,9 +193,9 @@ SDL_Point prog_image_coords(struct Prog *p, struct Image *img, float x, float y)
 }
 
 
-void prog_reset_heightbuf(struct Prog *p)
+void prog_reset_ybuf(struct Prog *p)
 {
     for (int i = 0; i < 800; ++i)
-        p->heightbuf[i] = 800;
+        p->ybuf[i] = 800;
 }
 
