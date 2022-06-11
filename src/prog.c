@@ -114,7 +114,7 @@ void prog_render_terrain(struct Prog *p)
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
 
-    for (float z = 1.f; z < 200.f; z += 5)
+    for (float z = 200.f; z > 1.f; z -= 5)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
