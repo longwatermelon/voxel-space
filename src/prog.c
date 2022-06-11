@@ -63,37 +63,6 @@ void prog_mainloop(struct Prog *p)
 
 void prog_render_terrain(struct Prog *p)
 {
-#if 0
-    for (int y = 0; y < 400; ++y)
-    {
-        for (int x = 0; x < 400; ++x)
-        {
-            SDL_Color col = image_at(p->color, (float)x / 400 * p->color->w, (float)y / 400 * p->color->h);
-            SDL_Color height = image_at(p->height, (float)x / 400 * p->height->w, (float)y / 400 * p->height->h);
-
-            SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
-            SDL_RenderDrawPoint(p->rend, x, y);
-
-            SDL_SetRenderDrawColor(p->rend, height.r, height.g, height.b, 255);
-            SDL_RenderDrawPoint(p->rend, x + 400, y);
-        }
-    }
-#endif
-
-    /* for (int y = 0; y < 800; ++y) */
-    /* { */
-    /*     for (int x = 0; x < 800; ++x) */
-    /*     { */
-    /*         SDL_Color col = image_at(p->color, (float)x / 800 * p->color->w, (float)y / 800 * p->color->h); */
-    /*         SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255); */
-    /*         SDL_RenderDrawPoint(p->rend, x, y); */
-    /*     } */
-    /* } */
-
-    /* SDL_Rect cam = { p->cam->pos.x - 5, p->cam->pos.y - 5, 10, 10 }; */
-    /* SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255); */
-    /* SDL_RenderFillRect(p->rend, &cam); */
-
     float left = -M_PI / 4.f;
     float right = M_PI / 4.f;
 
