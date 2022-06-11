@@ -178,11 +178,8 @@ SDL_Point prog_image_coords(struct Prog *p, struct Image *img, float x, float y)
     if (x < 0) x *= -1;
     if (y < 0) y *= -1;
 
-    int nx = roundf(x / 800.f * img->w);
-    int ny = roundf(y / 800.f * img->h);
-
-    nx = nx % img->w;
-    ny = ny % img->w;
+    int nx = (int)roundf(x) % img->w;
+    int ny = (int)roundf(y) % img->w;
 
     return (SDL_Point){ nx, ny };
 }
