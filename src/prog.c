@@ -114,7 +114,7 @@ void prog_render_terrain(struct Prog *p)
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
 
-    for (float z = 1.f; z < 100.f; ++z)
+    for (float z = 1.f; z < 200.f; z += 5)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -122,6 +122,33 @@ void prog_render_terrain(struct Prog *p)
         SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
         SDL_RenderDrawPoint(p->rend, lp.x, lp.y);
         SDL_RenderDrawPoint(p->rend, rp.x, rp.y);
+
+        float slope = (rp.y - lp.y) / (rp.x - lp.x);
+
+        if (fabsf(slope) > 1.f) // iterate with y
+        {
+            Vec2f min = lp.y < rp.y ? lp : rp;
+            Vec2f max = lp.y < rp.y ? rp : lp;
+            float x = min.x;
+
+            for (int y = min.y; y < max.y; ++y)
+            {
+                SDL_RenderDrawPoint(p->rend, x, y);
+                x += 1.f / slope;
+            }
+        }
+        else // iterate with x
+        {
+            Vec2f min = lp.x < rp.x ? lp : rp;
+            Vec2f max = lp.x < rp.x ? rp : lp;
+            float y = min.y;
+
+            for (int x = min.x; x < max.x; ++x)
+            {
+                SDL_RenderDrawPoint(p->rend, x, y);
+                y += slope;
+            }
+        }
     }
 }
 
