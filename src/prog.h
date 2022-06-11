@@ -24,5 +24,7 @@ void prog_mainloop(struct Prog *p);
 
 void prog_render_terrain(struct Prog *p);
 
+Vec2f prog_matmul(float mat[2][2], Vec2f p);
+
 #endif
 

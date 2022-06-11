@@ -46,6 +46,11 @@ void prog_mainloop(struct Prog *p)
             }
         }
 
+        const Uint8 *keys = SDL_GetKeyboardState(0);
+
+        if (keys[SDL_SCANCODE_LEFT]) p->cam->angle -= .03f;
+        if (keys[SDL_SCANCODE_RIGHT]) p->cam->angle += .03f;
+
         SDL_RenderClear(p->rend);
 
         prog_render_terrain(p);
@@ -88,22 +93,46 @@ void prog_render_terrain(struct Prog *p)
     SDL_Rect cam = { p->cam->pos.x - 5, p->cam->pos.y - 5, 10, 10 };
     SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
     SDL_RenderFillRect(p->rend, &cam);
-    float left = p->cam->angle - (M_PI / 4.f);
-    float right = p->cam->angle + (M_PI / 4.f);
+
+    float left = -M_PI / 4.f;
+    float right = M_PI / 4.f;
+
+    float rotl[2][2] = {
+        { cosf(left), -sinf(left) },
+        { sinf(left), cosf(left) }
+    };
+
+    float rotr[2][2] = {
+        { cosf(right), -sinf(right) },
+        { sinf(right), cosf(right) }
+    };
+
+    float rot[2][2] = {
+        { cosf(p->cam->angle), -sinf(p->cam->angle) },
+        { sinf(p->cam->angle), cosf(p->cam->angle) }
+    };
+
+    Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
 
     for (float z = 1.f; z < 100.f; ++z)
     {
-        Vec2f lp = vec_addv(p->cam->pos, vec_mulf((Vec2f){
-            cosf(left), -sinf(left)
-        }, z / cosf(left)));
-
-        Vec2f rp = vec_addv(p->cam->pos, vec_mulf((Vec2f){
-            cosf(right), -sinf(right)
-        }, z / cosf(right)));
+        Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
+        Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
 
         SDL_SetRenderDrawColor(p->rend, 255, 0, 0, 255);
         SDL_RenderDrawPoint(p->rend, lp.x, lp.y);
         SDL_RenderDrawPoint(p->rend, rp.x, rp.y);
     }
+}
+
+
+Vec2f prog_matmul(float mat[2][2], Vec2f p)
+{
+    Vec2f ret;
+
+    ret.x = mat[0][0] * p.x + mat[0][1] * p.y;
+    ret.y = mat[1][0] * p.x + mat[1][1] * p.y;
+
+    return ret;
 }
 
