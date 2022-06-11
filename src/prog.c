@@ -13,14 +13,18 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->color = image_alloc("color.png");
     p->height = image_alloc("height.png");
 
+    p->cam = cam_alloc((Vec2f){ 0, 0 }, 0.f);
+
     return p;
 }
 
 
 void prog_free(struct Prog *p)
 {
+    cam_free(p->cam);
     image_free(p->height);
     image_free(p->color);
+
     free(p);
 }
 

@@ -1,6 +1,7 @@
 #ifndef PROG_H
 #define PROG_H
 
+#include "camera.h"
 #include <stdbool.h>
 #include <SDL2/SDL.h>
 
@@ -12,6 +13,8 @@ struct Prog
     SDL_Renderer *rend;
 
     struct Image *color, *height;
+
+    struct Camera *cam;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
