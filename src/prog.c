@@ -14,7 +14,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->color = image_alloc("color.png");
     p->height = image_alloc("height.png");
 
-    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f);
+    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f, 0.f);
 
     return p;
 }
@@ -68,6 +68,9 @@ void prog_mainloop(struct Prog *p)
         if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 5.f;
         if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 5.f;
 
+        if (keys[SDL_SCANCODE_UP]) p->cam->pitch -= .03f;
+        if (keys[SDL_SCANCODE_DOWN]) p->cam->pitch += .03f;
+
         if (keys[SDL_SCANCODE_W])
         {
             p->cam->pos.x += 5.f * cosf(p->cam->angle);
@@ -113,9 +116,10 @@ void prog_render_terrain(struct Prog *p)
     };
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
-    float dz = 1.f;
+    float dist = 600.f / cosf(p->cam->pitch);
+    float dz = dist / 600.f;
 
-    for (float z = 600.f; z > 1.f; z -= dz)
+    for (float z = dist; z > 1.f; z -= dz)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -127,6 +131,7 @@ void prog_render_terrain(struct Prog *p)
         {
             SDL_Point coords = prog_image_coords(p, p->height, lp.x, lp.y);
             float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
+            height -= z * sinf(p->cam->pitch);
             height /= z;
             height = (height + 1.f) * 400.f;
 
