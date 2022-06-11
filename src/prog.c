@@ -14,7 +14,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->color = image_alloc("color.png");
     p->height = image_alloc("height.png");
 
-    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f);
+    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f);
 
     return p;
 }
@@ -50,6 +50,14 @@ void prog_mainloop(struct Prog *p)
 
         if (keys[SDL_SCANCODE_LEFT]) p->cam->angle -= .03f;
         if (keys[SDL_SCANCODE_RIGHT]) p->cam->angle += .03f;
+        if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 1.f;
+        if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 1.f;
+
+        if (keys[SDL_SCANCODE_W])
+        {
+            p->cam->pos.x += cosf(p->cam->angle);
+            p->cam->pos.y += sinf(p->cam->angle);
+        }
 
         SDL_RenderClear(p->rend);
 
@@ -83,7 +91,7 @@ void prog_render_terrain(struct Prog *p)
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
 
-    for (float z = 300.f; z > 1.f; z -= 1)
+    for (float z = 400.f; z > 1.f; z -= 1)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -93,9 +101,9 @@ void prog_render_terrain(struct Prog *p)
 
         for (int i = 0; i < 800; ++i)
         {
-            float height = image_at(p->height, lp.x / 800.f * p->height->w, lp.y / 800.f * p->height->h).r;
+            float height = p->cam->height + (255.f - image_at(p->height, lp.x / 800.f * p->height->w, lp.y / 800.f * p->height->h).r);
             height /= z;
-            height = 0 + (height + .5f) * 800.f;
+            height = (height + .5f) * 800.f;
 
             SDL_Color col = image_at(p->color, lp.x / 800.f * p->color->w, lp.y / 800.f * p->color->h);
             SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
