@@ -55,8 +55,8 @@ void prog_mainloop(struct Prog *p)
 
         if (keys[SDL_SCANCODE_W])
         {
-            p->cam->pos.x += cosf(p->cam->angle);
-            p->cam->pos.y += sinf(p->cam->angle);
+            p->cam->pos.x += 5.f * cosf(p->cam->angle);
+            p->cam->pos.y += 5.f * sinf(p->cam->angle);
         }
 
         SDL_RenderClear(p->rend);
@@ -101,11 +101,12 @@ void prog_render_terrain(struct Prog *p)
 
         for (int i = 0; i < 800; ++i)
         {
-            float height = p->cam->height + (255.f - image_at(p->height, lp.x / 800.f * p->height->w, lp.y / 800.f * p->height->h).r);
+            SDL_Point coords = prog_image_coords(p, p->color, lp.x, lp.y);
+            float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
             height /= z;
             height = (height + .5f) * 800.f;
 
-            SDL_Color col = image_at(p->color, lp.x / 800.f * p->color->w, lp.y / 800.f * p->color->h);
+            SDL_Color col = image_at(p->color, coords.x, coords.y);
             SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
             SDL_RenderDrawLine(p->rend, i, height, i, 800);
 
@@ -124,5 +125,20 @@ Vec2f prog_matmul(float mat[2][2], Vec2f p)
     ret.y = mat[1][0] * p.x + mat[1][1] * p.y;
 
     return ret;
+}
+
+
+SDL_Point prog_image_coords(struct Prog *p, struct Image *img, int x, int y)
+{
+    if (x < 0) x *= -1;
+    if (y < 0) y *= -1;
+
+    int nx = (float)x / 800.f * img->w;
+    int ny = (float)y / 800.f * img->h;
+
+    nx = nx % img->w;
+    ny = ny % img->w;
+
+    return (SDL_Point){ nx, ny };
 }
 
