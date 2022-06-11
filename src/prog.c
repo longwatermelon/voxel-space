@@ -53,6 +53,9 @@ void prog_mainloop(struct Prog *p)
                 case SDLK_2:
                     prog_switch_map(p, "color2.png", "height2.png");
                     break;
+                case SDLK_3:
+                    prog_switch_map(p, "color3.png", "height3.png");
+                    break;
                 }
             } break;
             }
