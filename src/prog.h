@@ -16,6 +16,8 @@ struct Prog
     struct Image *color, *height;
 
     struct Camera *cam;
+
+    int heightbuf[800];
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
@@ -24,9 +26,11 @@ void prog_free(struct Prog *p);
 void prog_mainloop(struct Prog *p);
 
 void prog_render_terrain(struct Prog *p);
-SDL_Point prog_image_coords(struct Prog *p, struct Image *img, int x, int y);
+SDL_Point prog_image_coords(struct Prog *p, struct Image *img, float x, float y);
 
 Vec2f prog_matmul(float mat[2][2], Vec2f p);
+
+void prog_reset_heightbuf(struct Prog *p);
 
 #endif
 

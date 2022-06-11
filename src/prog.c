@@ -59,6 +59,8 @@ void prog_mainloop(struct Prog *p)
             p->cam->pos.y += 5.f * sinf(p->cam->angle);
         }
 
+        prog_reset_heightbuf(p);
+
         SDL_RenderClear(p->rend);
 
         prog_render_terrain(p);
@@ -90,8 +92,9 @@ void prog_render_terrain(struct Prog *p)
     };
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
+    float dz = .5f;
 
-    for (float z = 400.f; z > 1.f; z -= 1)
+    for (float z = 400.f; z > 1.f; z -= dz)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -104,15 +107,25 @@ void prog_render_terrain(struct Prog *p)
             SDL_Point coords = prog_image_coords(p, p->color, lp.x, lp.y);
             float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
             height /= z;
-            height = (height + .5f) * 800.f;
+            height = (height + 1.f) * 400.f;
+
+            int bottom = 800;
+
+            if (height < p->heightbuf[i])
+            {
+                bottom = p->heightbuf[i];
+                p->heightbuf[i] = height;
+            }
 
             SDL_Color col = image_at(p->color, coords.x, coords.y);
             SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
-            SDL_RenderDrawLine(p->rend, i, height, i, 800);
+            SDL_RenderDrawLine(p->rend, i, height, i, bottom);
 
             lp.x += dx;
             lp.y += dy;
         }
+
+        dz += .05f;
     }
 }
 
@@ -128,17 +141,24 @@ Vec2f prog_matmul(float mat[2][2], Vec2f p)
 }
 
 
-SDL_Point prog_image_coords(struct Prog *p, struct Image *img, int x, int y)
+SDL_Point prog_image_coords(struct Prog *p, struct Image *img, float x, float y)
 {
     if (x < 0) x *= -1;
     if (y < 0) y *= -1;
 
-    int nx = (float)x / 800.f * img->w;
-    int ny = (float)y / 800.f * img->h;
+    int nx = roundf(x / 800.f * img->w);
+    int ny = roundf(y / 800.f * img->h);
 
     nx = nx % img->w;
     ny = ny % img->w;
 
     return (SDL_Point){ nx, ny };
+}
+
+
+void prog_reset_heightbuf(struct Prog *p)
+{
+    for (int i = 0; i < 800; ++i)
+        p->heightbuf[i] = 800;
 }
 
