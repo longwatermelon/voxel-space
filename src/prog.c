@@ -43,6 +43,18 @@ void prog_mainloop(struct Prog *p)
             case SDL_QUIT:
                 p->running = false;
                 break;
+            case SDL_KEYDOWN:
+            {
+                switch (evt.key.keysym.sym)
+                {
+                case SDLK_1:
+                    prog_switch_map(p, "color.png", "height.png");
+                    break;
+                case SDLK_2:
+                    prog_switch_map(p, "color2.png", "height2.png");
+                    break;
+                }
+            } break;
             }
         }
 
@@ -92,9 +104,9 @@ void prog_render_terrain(struct Prog *p)
     };
 
     Vec2f dir = prog_matmul(rot, (Vec2f){ 1, 0 });
-    float dz = .5f;
+    float dz = 1.f;
 
-    for (float z = 400.f; z > 1.f; z -= dz)
+    for (float z = 600.f; z > 1.f; z -= dz)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
@@ -104,7 +116,7 @@ void prog_render_terrain(struct Prog *p)
 
         for (int i = 0; i < 800; ++i)
         {
-            SDL_Point coords = prog_image_coords(p, p->color, lp.x, lp.y);
+            SDL_Point coords = prog_image_coords(p, p->height, lp.x, lp.y);
             float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
             height /= z;
             height = (height + 1.f) * 400.f;
@@ -117,6 +129,7 @@ void prog_render_terrain(struct Prog *p)
                 p->heightbuf[i] = height;
             }
 
+            coords = prog_image_coords(p, p->color, lp.x, lp.y);
             SDL_Color col = image_at(p->color, coords.x, coords.y);
             SDL_SetRenderDrawColor(p->rend, col.r, col.g, col.b, 255);
             SDL_RenderDrawLine(p->rend, i, height, i, bottom);
@@ -125,8 +138,18 @@ void prog_render_terrain(struct Prog *p)
             lp.y += dy;
         }
 
-        dz += .05f;
+        dz += .01f;
     }
+}
+
+
+void prog_switch_map(struct Prog *p, const char *color, const char *height)
+{
+    image_free(p->color);
+    image_free(p->height);
+
+    p->color = image_alloc(color);
+    p->height = image_alloc(height);
 }
 
 
