@@ -7,10 +7,10 @@ struct Camera
 {
     Vec2f pos;
     float height;
-    float angle, pitch;
+    float angle, pitch, tilt;
 };
 
-struct Camera *cam_alloc(Vec2f pos, float height, float angle, float pitch);
+struct Camera *cam_alloc(Vec2f pos, float height, float angle, float pitch, float tilt);
 void cam_free(struct Camera *c);
 
 #endif

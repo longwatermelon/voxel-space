@@ -17,7 +17,7 @@ struct Prog
 
     struct Camera *cam;
 
-    int ybuf[800];
+    int ybuf[1400];
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);

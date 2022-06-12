@@ -14,7 +14,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->color = image_alloc("color.png");
     p->height = image_alloc("height.png");
 
-    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f, 0.f);
+    p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f, 0.f, 0.f);
 
     prog_reset_ybuf(p);
 
@@ -65,8 +65,21 @@ void prog_mainloop(struct Prog *p)
 
         const Uint8 *keys = SDL_GetKeyboardState(0);
 
-        if (keys[SDL_SCANCODE_LEFT]) p->cam->angle -= .03f;
-        if (keys[SDL_SCANCODE_RIGHT]) p->cam->angle += .03f;
+        if (keys[SDL_SCANCODE_LEFT])
+        {
+            p->cam->angle -= .03f;
+            p->cam->tilt = 30;
+        }
+        else if (keys[SDL_SCANCODE_RIGHT])
+        {
+            p->cam->angle += .03f;
+            p->cam->tilt = -30;
+        }
+        else
+        {
+            p->cam->tilt = 0;
+        }
+
         if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 5.f;
         if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 5.f;
 
@@ -121,7 +134,7 @@ void prog_render_terrain(struct Prog *p)
     float dist = 600.f / cosf(p->cam->pitch);
     float dz = dist / 600.f;
 
-    SDL_Texture *target = SDL_CreateTexture(p->rend, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 800);
+    SDL_Texture *target = SDL_CreateTexture(p->rend, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 1400, 1400);
     SDL_SetRenderTarget(p->rend, target);
 
     SDL_SetRenderDrawColor(p->rend, 0, 0, 0, 255);
@@ -132,11 +145,11 @@ void prog_render_terrain(struct Prog *p)
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
 
-        // Use 1000 instead of 800 for extra room when rotating
-        float dx = (rp.x - lp.x) / 800.f;
-        float dy = (rp.y - lp.y) / 800.f;
+        // 300px padding on each side
+        float dx = (rp.x - lp.x) / 1400.f;
+        float dy = (rp.y - lp.y) / 1400.f;
 
-        for (int i = 0; i < 800; ++i)
+        for (int i = 0; i < 1400; ++i)
         {
             SDL_Point coords = prog_image_coords(p, p->height, lp.x, lp.y);
             float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
@@ -144,7 +157,7 @@ void prog_render_terrain(struct Prog *p)
             height /= z;
             height = (height + 1.f) * 400.f;
 
-            int bottom = 800;
+            int bottom = 1400;
 
             if (height < p->ybuf[i])
             {
@@ -157,7 +170,6 @@ void prog_render_terrain(struct Prog *p)
                 SDL_RenderDrawLine(p->rend, i, height, i, bottom);
             }
 
-
             lp.x += dx;
             lp.y += dy;
         }
@@ -166,7 +178,9 @@ void prog_render_terrain(struct Prog *p)
     }
 
     SDL_SetRenderTarget(p->rend, 0);
-    SDL_RenderCopy(p->rend, target, 0, 0);
+    SDL_Point center = { 550, 550 };
+    SDL_Rect dst = { -300, -300, 1400, 1400 };
+    SDL_RenderCopyEx(p->rend, target, 0, &dst, p->cam->tilt, &center, SDL_FLIP_NONE);
     SDL_DestroyTexture(target);
 }
 
@@ -206,7 +220,7 @@ SDL_Point prog_image_coords(struct Prog *p, struct Image *img, float x, float y)
 
 void prog_reset_ybuf(struct Prog *p)
 {
-    for (int i = 0; i < 800; ++i)
-        p->ybuf[i] = 800;
+    for (int i = 0; i < 1400; ++i)
+        p->ybuf[i] = 1400;
 }
 
