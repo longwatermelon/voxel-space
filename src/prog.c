@@ -121,11 +121,18 @@ void prog_render_terrain(struct Prog *p)
     float dist = 600.f / cosf(p->cam->pitch);
     float dz = dist / 600.f;
 
+    SDL_Texture *target = SDL_CreateTexture(p->rend, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 800);
+    SDL_SetRenderTarget(p->rend, target);
+
+    SDL_SetRenderDrawColor(p->rend, 0, 0, 0, 255);
+    SDL_RenderFillRect(p->rend, 0);
+
     for (float z = 1.f; z < dist; z += dz)
     {
         Vec2f lp = vec_addv(p->cam->pos, prog_matmul(rotl, vec_mulf(dir, z)));
         Vec2f rp = vec_addv(p->cam->pos, prog_matmul(rotr, vec_mulf(dir, z)));
 
+        // Use 1000 instead of 800 for extra room when rotating
         float dx = (rp.x - lp.x) / 800.f;
         float dy = (rp.y - lp.y) / 800.f;
 
@@ -157,6 +164,10 @@ void prog_render_terrain(struct Prog *p)
 
         dz += .01f;
     }
+
+    SDL_SetRenderTarget(p->rend, 0);
+    SDL_RenderCopy(p->rend, target, 0, 0);
+    SDL_DestroyTexture(target);
 }
 
 
