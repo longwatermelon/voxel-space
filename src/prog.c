@@ -15,6 +15,7 @@ struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r)
     p->height = image_alloc("height.png");
 
     p->cam = cam_alloc((Vec2f){ 400, 400 }, 0.f, 0.f, 0.f, 0.f);
+    p->target_tilt = 0.f;
 
     prog_reset_ybuf(p);
 
@@ -68,17 +69,19 @@ void prog_mainloop(struct Prog *p)
         if (keys[SDL_SCANCODE_LEFT])
         {
             p->cam->angle -= .03f;
-            p->cam->tilt = 30;
+            p->target_tilt = 30;
         }
         else if (keys[SDL_SCANCODE_RIGHT])
         {
             p->cam->angle += .03f;
-            p->cam->tilt = -30;
+            p->target_tilt = -30;
         }
         else
         {
-            p->cam->tilt = 0;
+            p->target_tilt = 0;
         }
+
+        p->cam->tilt += (p->target_tilt - p->cam->tilt) / 5.f;
 
         if (keys[SDL_SCANCODE_SPACE]) p->cam->height += 5.f;
         if (keys[SDL_SCANCODE_LSHIFT]) p->cam->height -= 5.f;

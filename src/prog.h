@@ -18,6 +18,8 @@ struct Prog
     struct Camera *cam;
 
     int ybuf[1400];
+
+    float target_tilt;
 };
 
 struct Prog *prog_alloc(SDL_Window *w, SDL_Renderer *r);
