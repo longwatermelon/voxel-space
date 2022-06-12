@@ -158,7 +158,7 @@ void prog_render_terrain(struct Prog *p)
             float height = p->cam->height + (255.f - image_at(p->height, coords.x, coords.y).r);
             height -= z * sinf(p->cam->pitch);
             height /= z;
-            height = (height + 1.f) * 400.f;
+            height = (height + .5f) * 800.f;
 
             int bottom = 1400;
 
